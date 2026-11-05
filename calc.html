@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <button onclick="add()">足し算する</button>
+    <button onclick="changeColor('lightblue')">水色</button>
+<button onclick="changeColor('pink')">ピンク</button>
+<button onclick="changeColor('yellowgreen')">黄緑</button>
+
+<script>
+  function changeColor(color) {
+    document.body.style.backgroundColor = color;
+  }
+</script>
+    <!-- <script>
+      function add() {
+       const a = Number(prompt("1つ目の数を入力してください"));
+        const b = Number(prompt("2つ目の数を入力してください"));
+        const answer = a + b;
+        console.log(`${a} + ${b} = ${answer}`);
+        alert(`答えは ${answer} です`);
+      }
+    </script> -->
+</body>
+</html>
