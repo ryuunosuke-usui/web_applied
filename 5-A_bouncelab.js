@@ -6,7 +6,7 @@ let x = 100;          // 丸の中心の位置
 let y = 80;
 let vx = 180;         // 横の速さ（1秒に180px）
 let vy = 140;         // 縦の速さ（1秒に140px。＋ は下へ）
-const r = 14;         // 半径
+let r = 14;         // ★ const から let に変更！
 let last = performance.now();
 
 function update(dt) {
@@ -50,7 +50,36 @@ function loop(now) {
 
   update(dt);
   draw();
+  
   requestAnimationFrame(loop);
 }
+// キーを押した瞬間に1回だけ値を変える処理（3つ以上）
+document.addEventListener("keydown", (e) => {
+  // 1つ目：↑ キーで速さを1.2倍にする（速くする）
+  if (e.code === "ArrowUp") {
+    vx = vx * 1.2;
+    vy = vy * 1.2;
+  }
+  
+  // 2つ目：↓ キーで速さを0.8倍にする（遅くする）
+  if (e.code === "ArrowDown") {
+    vx = vx * 0.8;
+    vy = vy * 0.8;
+  }
+  
+  // 3つ目：R キーで半径を少し大きくする（上限を50pxまでにする）
+  if (e.code === "KeyR") {
+    if (r < 50) {
+      r = r + 4;
+    }
+  }
+  
+  // 4つ目（おまけ）：E キーで半径を小さくする（ただし 5px より小さくならないようにガードする）
+  if (e.code === "KeyE") {
+    if (r > 5) {
+      r = r - 4;
+    }
+  }
+});
 
 requestAnimationFrame(loop);
