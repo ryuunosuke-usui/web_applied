@@ -2,43 +2,66 @@ const canvas = document.getElementById("stage");
 const ctx = canvas.getContext("2d");
 const info = document.getElementById("info");   // 5_stage.html の <p id="info">
 
-let x = 100;          // 丸の中心の位置
-let y = 80;
-let vx = 180;         // 横の速さ（1秒に180px）
-let vy = 140;         // 縦の速さ（1秒に140px。＋ は下へ）
-let r = 14;         // ★ const から let に変更！
+// ボールを2つ（オブジェクトの配列）にする
+let balls = [
+  {
+    x: 100,          // 1つ目の丸の中心の位置
+    y: 80,
+    vx: 180,         // 横の速さ
+    vy: 140,         // 縦の速さ
+    r: 14            // 半径
+  },
+  {
+    x: 300,          // 2つ目の丸の中心の位置
+    y: 200,
+    vx: -120,        // 2つ目は別の速さと方向にする
+    vy: 160,
+    r: 20
+  }
+];
+
 let last = performance.now();
 
 function update(dt) {
-  x = x + vx * dt;
-  y = y + vy * dt;
+  // 配列を使って、すべてのボールの動きをまとめて計算する
+  for (let i = 0; i < balls.length; i++) {
+    let b = balls[i];
 
-  // 左右の壁（丸は x が中心なので、半径 r を足し引きする）
-  if (x + r > canvas.width) {
-    x = canvas.width - r;
-    vx = -vx;
-  }
-  if (x - r < 0) {
-    x = r;
-    vx = -vx;
-  }
-  // 上下の壁
-  if (y + r > canvas.height) {
-    y = canvas.height - r;
-    vy = -vy;
-  }
-  if (y - r < 0) {
-    y = r;
-    vy = -vy;
+    b.x = b.x + b.vx * dt;
+    b.y = b.y + b.vy * dt;
+
+    // 左右の壁
+    if (b.x + b.r > canvas.width) {
+      b.x = canvas.width - b.r;
+      b.vx = -b.vx;
+    }
+    if (b.x - b.r < 0) {
+      b.x = b.r;
+      b.vx = -b.vx;
+    }
+    // 上下の壁
+    if (b.y + b.r > canvas.height) {
+      b.y = canvas.height - b.r;
+      b.vy = -b.vy;
+    }
+    if (b.y - b.r < 0) {
+      b.y = b.r;
+      b.vy = -b.vy;
+    }
   }
 }
 
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
- ctx.fillStyle = "#ffd166";
-  ctx.beginPath();
-  ctx.arc(x, y, r, 0, Math.PI * 2);
-  ctx.fill();
+  ctx.fillStyle = "#ffd166";
+
+  // 配列を使って、すべてのボールを画面に描画する
+  for (let i = 0; i < balls.length; i++) {
+    let b = balls[i];
+    ctx.beginPath();
+    ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+    ctx.fill();
+  }
 }
 
 // now：今回呼ばれた時刻（ミリ秒）。requestAnimationFrame が引数で渡してくれる
@@ -46,38 +69,36 @@ function loop(now) {
   const dt = (now - last) / 1000;   // 前回からの時間（秒）
   last = now;                       // 今回の時刻を、次の「前回」として覚えておく
 
-  info.textContent = "dt：" + dt.toFixed(4) + " 秒　／　1秒に約 " + (1 / dt).toFixed(0) + " 回";
+  info.textContent = "dt：" + dt.toFixed(4) + " 秒 ／ 1秒に約 " + (1 / dt).toFixed(0) + " 回";
 
   update(dt);
   draw();
   
   requestAnimationFrame(loop);
 }
-// キーを押した瞬間に1回だけ値を変える処理（3つ以上）
+
+// キーを押した瞬間に1回だけ値を変える処理（すべてのボールの速さや、1つ目のボールの大きさを変える）
 document.addEventListener("keydown", (e) => {
-  // 1つ目：↑ キーで速さを1.2倍にする（速くする）
   if (e.code === "ArrowUp") {
-    vx = vx * 1.2;
-    vy = vy * 1.2;
-  }
-  
-  // 2つ目：↓ キーで速さを0.8倍にする（遅くする）
-  if (e.code === "ArrowDown") {
-    vx = vx * 0.8;
-    vy = vy * 0.8;
-  }
-  
-  // 3つ目：R キーで半径を少し大きくする（上限を50pxまでにする）
-  if (e.code === "KeyR") {
-    if (r < 50) {
-      r = r + 4;
+    for (let i = 0; i < balls.length; i++) {
+      balls[i].vx *= 1.2;
+      balls[i].vy *= 1.2;
     }
   }
-  
-  // 4つ目（おまけ）：E キーで半径を小さくする（ただし 5px より小さくならないようにガードする）
+  if (e.code === "ArrowDown") {
+    for (let i = 0; i < balls.length; i++) {
+      balls[i].vx *= 0.8;
+      balls[i].vy *= 0.8;
+    }
+  }
+  if (e.code === "KeyR") {
+    if (balls[0].r < 50) {
+      balls[0].r += 4;
+    }
+  }
   if (e.code === "KeyE") {
-    if (r > 5) {
-      r = r - 4;
+    if (balls[0].r > 5) {
+      balls[0].r -= 4;
     }
   }
 });
