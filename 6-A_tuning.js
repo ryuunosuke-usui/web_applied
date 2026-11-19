@@ -1,16 +1,17 @@
 const canvas = document.getElementById("stage");
 const ctx = canvas.getContext("2d");
 
-// 調整する数（ここだけを変えて試す）
+// 調整する数
 const CONFIG = {
-  GRAVITY: 196,          // 9.8 m/秒² × 20
-  JUMP_SPEED: 60,        // 3 m/秒 × 20
-  MOVE_SPEED: 100,       // 5 m/秒 × 20
-  MAX_JUMPS: 1,          // 現実では空中で跳べない
-  FALL_GRAVITY_RATE: 1,  // 現実では落ちるときも重力は同じ
+  GRAVITY: 2000,          // 重力はしっかり戻す
+  JUMP_SPEED: 700,        // ジャンプの初速
+  MOVE_SPEED: 240,        // 地上での移動スピード
+  MAX_JUMPS: 3,           // 【手順５】空中で合計3回跳べるようにする（1回＋空中2回）
+  FALL_GRAVITY_RATE: 2,   // 落ちるときの重力
+  AIR_MOVE_RATE: 1.5,     // 【追加】空中にいるときの移動スピードの倍率（キビキビ動かすため）
 };
 
-const TARGET_HEIGHT = 64;   // 目印の線の高さ（床から64px＝キャラ2つ分）。ぶつからない
+const TARGET_HEIGHT = 64;   // 目印の線の高さ
 
 const player = { x: 80, y: 20, w: 32, h: 32, vy: 0, isGrounded: false, jumpsLeft: CONFIG.MAX_JUMPS };
 const floor = { x: 0, y: 320, w: 640, h: 40 };
@@ -18,7 +19,7 @@ const floor = { x: 0, y: 320, w: 640, h: 40 };
 const keys = {};
 document.addEventListener("keydown", (e) => {
   keys[e.code] = true;
-  // 跳べる回数が残っていれば跳ぶ（空中でも）
+  // 跳べる回数が残っていれば跳ぶ（空中でも3回まで可能）
   if (e.code === "Space" && player.jumpsLeft > 0) {
     player.vy = -CONFIG.JUMP_SPEED;
     player.jumpsLeft = player.jumpsLeft - 1;
@@ -33,20 +34,27 @@ function collideWithFloor() {
     player.y = floor.y - player.h;
     player.vy = 0;
     player.isGrounded = true;
-    player.jumpsLeft = CONFIG.MAX_JUMPS;   // 着地したら、跳べる回数を元に戻す
+    player.jumpsLeft = CONFIG.MAX_JUMPS;   // 着地したら跳べる回数が復活
   } else {
     player.isGrounded = false;
   }
 }
 
 function update(dt) {
+  // 地上と空気中で横移動のスピードを切り替える（空中は AIR_MOVE_RATE をかけてキビキビ動かす）
+  let currentMoveSpeed = CONFIG.MOVE_SPEED;
+  if (!player.isGrounded) {
+    currentMoveSpeed = CONFIG.MOVE_SPEED * CONFIG.AIR_MOVE_RATE;
+  }
+
   if (keys["ArrowRight"]) {
-    player.x = player.x + CONFIG.MOVE_SPEED * dt;
+    player.x = player.x + currentMoveSpeed * dt;
   }
   if (keys["ArrowLeft"]) {
-    player.x = player.x - CONFIG.MOVE_SPEED * dt;
+    player.x = player.x - currentMoveSpeed * dt;
   }
-  // 落ちているとき（vy が＋）だけ、重力を強くする
+
+  // 落ちているときは重力を強くする
   const g = player.vy > 0 ? CONFIG.GRAVITY * CONFIG.FALL_GRAVITY_RATE : CONFIG.GRAVITY;
   player.vy = player.vy + g * dt;
   player.y = player.y + player.vy * dt;
@@ -58,7 +66,7 @@ function draw() {
   ctx.fillStyle = "#203060";
   ctx.fillRect(floor.x, floor.y, floor.w, floor.h);
 
-  // 目印の線（跳んだ高さをくらべる）
+  // 目印の線
   ctx.fillStyle = "#ff6b6b";
   ctx.fillRect(0, floor.y - TARGET_HEIGHT, canvas.width, 2);
 
