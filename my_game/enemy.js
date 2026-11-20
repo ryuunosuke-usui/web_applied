@@ -11,10 +11,28 @@ enemies.push(createEnemy(200, 80));
 enemies.push(createEnemy(380, -120));
 enemies.push(createEnemy(540, 60));
 
+const stopAndGoEnemy = createEnemy(460, 100);
+stopAndGoEnemy.type = "stopAndGo";
+stopAndGoEnemy.timer = 0;
+stopAndGoEnemy.moving = true;
+enemies.push(stopAndGoEnemy);
+
 // ③ 動かす：配列の敵を1体ずつ取り出して、同じ処理をする
 function updateEnemies(dt) {
   for (const enemy of enemies) {
-    enemy.x = enemy.x + enemy.vx * dt;
+    if (enemy.type === "stopAndGo") {
+      enemy.timer = enemy.timer + dt;
+      if (enemy.timer >= 1) {
+        enemy.moving = !enemy.moving;
+        enemy.timer = 0;
+      }
+      if (enemy.moving) {
+        enemy.x = enemy.x + enemy.vx * dt;
+      }
+    } else {
+      enemy.x = enemy.x + enemy.vx * dt;
+    }
+
     // 端を越えたら、位置を戻して、向きを反対に（５-４の跳ね返り）
     if (enemy.x < 0) {
       enemy.x = 0;
@@ -40,8 +58,12 @@ function collideWithEnemies(prevBottom) {
 
 // ④ 描く：配列の敵を1体ずつ取り出して描く
 function drawEnemies() {
-  ctx.fillStyle = "#ff6b6b";
   for (const enemy of enemies) {
+    if (enemy.type === "stopAndGo") {
+      ctx.fillStyle = enemy.moving ? "#ffd43b" : "#74c0fc";
+    } else {
+      ctx.fillStyle = "#ff6b6b";
+    }
     ctx.fillRect(enemy.x, enemy.y, enemy.w, enemy.h);
   }
   ctx.fillStyle = "#e8eeff";
