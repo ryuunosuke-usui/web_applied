@@ -25,6 +25,12 @@ document.addEventListener("keydown", (e) => {
     }
   }
 });
+// タイトルとゲームオーバーでは、クリックでも始められる
+canvas.addEventListener("pointerdown", () => {
+  if (gameState === "title" || gameState === "gameover") {
+    startGame();
+  }
+});
 // 全体の流れ：毎回「動かす → 描く」をくり返す
 
 // 役割ごとの「動かす」関数を呼ぶ
@@ -66,7 +72,8 @@ function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   drawStage();
   if (gameState === "title") {
-    drawMessage("my game", "Enter で始める");
+    drawMessage("my game", "Enter かクリックで始める");
+    drawAim();
     return;                 // タイトルでは、敵とプレイヤーは描かない
   }
   drawEnemies();
@@ -77,8 +84,9 @@ function draw() {
     drawMessage("PAUSE", "P でつづける");
   }
     if (gameState === "gameover") {
-    drawMessage("GAME OVER", "Enter でもう一度");
+    drawMessage("GAME OVER","SCORE " + score + "　Enter かクリックでもう一度");
   }
+  drawAim();                // いちばん最後
 }
 
 let last = performance.now();
