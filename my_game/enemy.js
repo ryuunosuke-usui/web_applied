@@ -7,15 +7,21 @@ function createEnemy(x, vx) {
 
 // ② 入れる：敵をまとめて入れる配列（７-６で入れ直すので let）
 let enemies = [];
-enemies.push(createEnemy(200, 80));
-enemies.push(createEnemy(380, -120));
-enemies.push(createEnemy(540, 60));
-
-const stopAndGoEnemy = createEnemy(460, 100);
+// 最初の敵を入れ直す（★ main.js の resetGame から呼ばれる）
+function resetEnemies() {
+  enemies = [];
+  enemies.push(createEnemy(200, 80));
+  enemies.push(createEnemy(380, -120));
+  enemies.push(createEnemy(540, 60));
+  // ↑ 授業でくじの敵を足した人は、その行（const special = … から enemies.push(special); まで）もここへ
+  const stopAndGoEnemy = createEnemy(460, 100);
 stopAndGoEnemy.type = "stopAndGo";
 stopAndGoEnemy.timer = 0;
 stopAndGoEnemy.moving = true;
 enemies.push(stopAndGoEnemy);
+}
+
+
 
 // ③ 動かす：配列の敵を1体ずつ取り出して、同じ処理をする
 function updateEnemies(dt) {
